@@ -1,16 +1,23 @@
 import processing.serial.*;
 import processing.video.*;
+import processing.net.*;
+
 
 Capture cam;
 
 Serial myPort;
+
+Server myServer;
+
+int port = 10002;
+
 int val;
 
 float counter;
 PImage img;
 
 boolean rotate = false;
-
+boolean myServerRunning = true;
 
 void setup() {
 
@@ -38,6 +45,8 @@ void setup() {
     String portName = Serial.list()[0];
 
     myPort = new Serial(this, portName, 9600);
+    
+    myServer = new Server(this, port);
 
 
     counter=0.0;
@@ -49,6 +58,7 @@ void setup() {
 
 void draw() {
 
+  myServer.write("/n");
 
   background(0);
 
@@ -57,6 +67,9 @@ void draw() {
   if (cam.available() == true) {
     cam.read();
   }
+  
+  
+   
 
 // Rotate the image if needed
   if (rotate == true) {
@@ -72,6 +85,17 @@ void draw() {
 
     image(cam, 0, 0);
   }
+  
+  if (myServerRunning == true) {
+     Client thisClient = myServer.available();
+     if (thisClient != null) {
+      if (thisClient.available() > 0) {
+
+        print(thisClient.readString());
+      }
+     }
+   }
+     
 }
 
 
